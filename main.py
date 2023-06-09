@@ -1,15 +1,15 @@
 # -*- coding:utf-8 -*-
-import os
-import requests
-import hashlib
-import time
+import configparser
 import copy
+import hashlib
 import logging
+import os
 import random
-
 import smtplib
+import time
 from email.mime.text import MIMEText
 
+import requests
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -173,6 +173,7 @@ def client_sign(bduss, tbs, fid, kw):
     res = s.post(url=SIGN_URL, data=data, timeout=5).json()
     return res
 
+
 def send_email(sign_list):
     if ('HOST' not in ENV or 'FROM' not in ENV or 'TO' not in ENV or 'AUTH' not in ENV):
         logger.error("未配置邮箱")
@@ -198,8 +199,8 @@ def send_email(sign_list):
     for i in sign_list:
         body += f"""
         <div class="child">
-            <div class="name"> 贴吧名称: { i['name'] }</div>
-            <div class="slogan"> 贴吧简介: { i['slogan'] }</div>
+            <div class="name"> 贴吧名称: {i['name']}</div>
+            <div class="slogan"> 贴吧简介: {i['slogan']}</div>
         </div>
         <hr>
         """
@@ -211,20 +212,27 @@ def send_email(sign_list):
     smtp.sendmail(FROM, TO, msg.as_string())
     smtp.quit()
 
+
 def main():
-    if ('BDUSS' not in ENV):
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
+    bduss = config.get('DEFAULT', 'BDUSS')
+
+    if not bduss:
         logger.error("未配置BDUSS")
         return
-    b = ENV['BDUSS'].split('#')
+
+    b = bduss.split('#')
     for n, i in enumerate(b):
         logger.info("开始签到第" + str(n) + "个用户" + i)
         tbs = get_tbs(i)
         favorites = get_favorite(i)
         for j in favorites:
-            time.sleep(random.randint(1,5))
+            time.sleep(random.randint(1, 5))
             client_sign(i, tbs, j["id"], j["name"])
         logger.info("完成第" + str(n) + "个用户签到")
-    send_email(favorites)
+
     logger.info("所有用户签到结束")
 
 
