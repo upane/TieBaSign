@@ -3,9 +3,10 @@ name: Ping v2ex.com
 on: [push]
 
 jobs:
-  build:
+  my-job:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Ping v2ex.com
-        run: ping v2ex.com
+      - name: My Step
+        env:
+          COOKIE: ${{ secrets.V2EX_COOKIE }}
+        run: python vtwoex.py
