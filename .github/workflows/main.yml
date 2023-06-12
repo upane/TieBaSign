@@ -1,0 +1,11 @@
+name: Ping v2ex.com
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping v2ex.com
+        run: ping v2ex.com
